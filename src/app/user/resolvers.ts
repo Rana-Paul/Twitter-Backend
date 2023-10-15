@@ -1,8 +1,8 @@
-import axios from "axios";
 import { prismaClient } from "../../client/db";
 import { GraphqlContext } from "../../interfaces";
 import { User } from "prisma/prisma-client";
 import UserService from "../../services/user";
+import redisClient from "../../client/redis";
 
 const queries = {
   verifyGoogleToken: async (parent: any, { token }: { token: string }) => {
@@ -26,11 +26,13 @@ const mutations = {
   followUser: async(parent: any, {to}: {to: string}, ctx: GraphqlContext) => {
     if(!ctx.user || !ctx.user.id) throw new Error("You must be logged in to follow a user")
     await UserService.followUser(ctx.user?.id, to)
+    await redisClient.del(`RECOMMENDED_USERS_:${ctx.user?.id}`)
     return true;
   },
   unfollowUser: async(parent: any, {to}: {to: string}, ctx: GraphqlContext) => {
     if(!ctx.user || !ctx.user.id) throw new Error("You must be logged in to follow a user")
     await UserService.unfollowUser(ctx.user?.id, to)
+    await redisClient.del(`RECOMMENDED_USERS_:${ctx.user?.id}`)
     return true;
   }
 
@@ -72,6 +74,10 @@ const extraResolvers = {
 
     recommendedUsers: async(parent: User, _:any, ctx: GraphqlContext) => {
       if(!ctx.user || !ctx.user.id) return [];
+      const cachedValue = await redisClient.get(`RECOMMENDED_USERS_:${ctx.user?.id}`);
+
+      if(cachedValue) return JSON.parse(cachedValue);
+
       const myFollowings = await prismaClient.follows.findMany({
         where: { follower: { id: ctx.user?.id } },
         include: {
@@ -90,6 +96,8 @@ const extraResolvers = {
         }
 
       }
+
+      await redisClient.set(`RECOMMENDED_USERS_:${ctx.user?.id}`,JSON.stringify(user))
 
       return user
       

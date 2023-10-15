@@ -45,6 +45,16 @@ const muatation = {
             throw new Error("You must be logged in to create a tweet");
         const tweet = yield tweet_1.default.createTweet(Object.assign(Object.assign({}, payload), { userId: ctx.user.id }));
         return tweet;
+    }),
+    deleteTweet: (parent, { payload }, ctx) => __awaiter(void 0, void 0, void 0, function* () {
+        console.log(ctx);
+        if (!ctx.user)
+            throw new Error("You must be logged in to delete a tweet");
+        // console.log(ctx.user, "tweet: ", id);
+        if (ctx.user.id !== payload.authorId)
+            throw new Error("You are not a currect user");
+        const tweet = yield tweet_1.default.deleteTweet(payload.tweetId);
+        return tweet;
     })
 };
 const extraResolvers = {

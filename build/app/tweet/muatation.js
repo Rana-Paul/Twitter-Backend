@@ -5,5 +5,6 @@ exports.muatation = void 0;
 exports.muatation = `#graphql
 
  createTweet(payload: CreateTweetData!): Tweet
+ deleteTweet(payload: DeleteTweetData!): Boolean
 
 `;

@@ -6,7 +6,7 @@ input CreateTweetData {
     
 }
 
-    type Tweet {
+type Tweet {
         id: ID!
         content: String!
         imageURL: String
@@ -15,4 +15,9 @@ input CreateTweetData {
 
     }
 
-`
+input DeleteTweetData {
+    tweetId: ID!
+    authorId: ID!
+}
+
+`;
