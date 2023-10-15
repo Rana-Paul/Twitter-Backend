@@ -2,7 +2,6 @@ import { User } from "prisma/prisma-client";
 import JWT from 'jsonwebtoken'
 import { JWTUser } from "../interfaces";
 
-const JWT_SECRET = 'Basubasu@1'
 
 class JWTServices {
     public static  generateTokenForUser(user: User) {
@@ -10,7 +9,7 @@ class JWTServices {
             id: user?.id,
             email: user?.email
         }
-        const token = JWT.sign(payload, JWT_SECRET);
+        const token = JWT.sign(payload, process.env.JWT_SECRET as string);
         return token;
     }
 
@@ -18,7 +17,7 @@ class JWTServices {
 
         try {
             
-            return JWT.verify(token, JWT_SECRET) as JWTUser
+            return JWT.verify(token, process.env.JWT_SECRET as string) as JWTUser
         } catch (error) {
             return null            
         }
